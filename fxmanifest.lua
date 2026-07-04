@@ -3,7 +3,7 @@ rdr3_warning 'I acknowledge that this is a prerelease build of RedM, and I am aw
 game 'rdr3'
 
 description 'rsg-shops'
-version '2.1.3'
+version '2.1.1'
 
 shared_scripts {
     '@ox_lib/init.lua',
@@ -26,8 +26,7 @@ files {
 dependencies {
     'rsg-core',
     'rsg-inventory',
-    'ox_lib',
-    'ox_target'
+    'ox_lib'
 }
 
 lua54 'yes'
