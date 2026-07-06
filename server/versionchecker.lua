@@ -1,35 +1,75 @@
-local RSGCore = exports['rsg-core']:GetCoreObject()
-
 -----------------------------------------------------------------------
--- version checker
------------------------------------------------------------------------
-local function versionCheckPrint(_type, log)
-    local color = _type == 'success' and '^2' or '^1'
+-- Improved Version Checker for Rexshack-RedM Resources
+----------------------------------------------------------------------- 
 
-    print(('^5['..GetCurrentResourceName()..']%s %s^7'):format(color, log))
+local resourceName = GetCurrentResourceName()
+local githubRawBase = 'https://raw.githubusercontent.com/Rexshack-RedM/rsg-versioncheckers/main/'
+lib.locale()
+
+local function printLog(type, message)
+    local color = (type == 'success' and '^2') or (type == 'warning' and '^3') or '^1'
+    print(('[%s]%s %s^7'):format(resourceName, color, message))
+end
+
+-- Simple semantic version comparison (supports major.minor.patch)
+local function isVersionOutdated(current, latest)
+    local function splitVersion(v)
+        local major, minor, patch = v:match("(%d+)%.(%d+)%.(%d+)")
+        if major then
+            return {tonumber(major), tonumber(minor) or 0, tonumber(patch) or 0}
+        end
+        return {0, 0, 0} -- fallback
+    end
+
+    local c = splitVersion(current)
+    local l = splitVersion(latest)
+
+    for i = 1, 3 do
+        if l[i] > c[i] then return true
+        elseif l[i] < c[i] then return false
+        end
+    end
+    return false -- equal
 end
 
 local function CheckVersion()
-    PerformHttpRequest('https://raw.githubusercontent.com/Rexshack-RedM/rsg-versioncheckers/main/'..GetCurrentResourceName()..'/version.txt', function(err, text, headers)
-        local currentVersion = GetResourceMetadata(GetCurrentResourceName(), 'version')
+    local currentVersion = GetResourceMetadata(resourceName, 'version')
+    if not currentVersion then
+        printLog('error', locale('version_read_failed'))
+        return
+    end
 
-        if not text then
-            versionCheckPrint('error', 'Currently unable to run a version check.')
+    local versionUrl = githubRawBase .. resourceName .. '/version.txt'
+
+    PerformHttpRequest(versionUrl, function(statusCode, remoteVersion, headers)
+        if statusCode ~= 200 then
+            printLog('error', locale('http_check_failed', statusCode))
             return
         end
 
-        versionCheckPrint('success', ('Current Version: %s'):format(currentVersion))
-        versionCheckPrint('success', ('Latest Version: %s'):format(text))
-
-        if text == currentVersion then
-            versionCheckPrint('success', 'You are running the latest version.')
-        else
-            versionCheckPrint('error', ('You are currently running an outdated version, please update to version %s'):format(text))
+        if not remoteVersion or remoteVersion == '' then
+            printLog('error', locale('empty_version_data'))
+            return
         end
-    end)
+
+        -- Trim whitespace/newlines
+        remoteVersion = remoteVersion:gsub('%s+$', '')
+
+        if currentVersion == remoteVersion then
+            printLog('success', locale('running_latest'))
+            return
+        end
+
+        if isVersionOutdated(currentVersion, remoteVersion) then
+            printLog('error', locale('outdated_version', remoteVersion))
+            printLog('error', locale('download_from', resourceName))
+        else
+            printLog('warning', locale('dev_build_detected', currentVersion, remoteVersion))
+        end
+    end, 'GET')
 end
 
 --------------------------------------------------------------------------------------------------
--- start version check
+-- Start version check on resource start
 --------------------------------------------------------------------------------------------------
 CheckVersion()
