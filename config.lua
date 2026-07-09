@@ -21,6 +21,8 @@ Config.NPCModel = 's_m_m_unibutchers_01' -- default NPC model for shops
 ---------------------------------
 Config.Products = {
     ['normal'] = {
+        { name = 'notebook',               price = string.format("%.2f", 0.20),  buyPrice = string.format("%.2f", 10.00) },
+        { name = 'pen',               price = string.format("%.2f", 0.20),  buyPrice = string.format("%.2f", 1.00) },
         -- Consumables
         { name = 'bread',               price = string.format("%.2f", 0.20),  buyPrice = string.format("%.2f", 0.05) },
         { name = 'coffee',              price = string.format("%.2f", 0.25),  buyPrice = string.format("%.2f", 0.06) },
