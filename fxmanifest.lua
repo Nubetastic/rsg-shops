@@ -7,13 +7,11 @@ version '2.1.3'
 
 shared_scripts {
     '@ox_lib/init.lua',
-    'config.lua',
-    'configHours.lua',
+    'config.lua'
 }
 
 client_scripts {
-    'client/client.lua',
-    'client/hours.lua',
+    'client/client.lua'
 }
 
 server_scripts {
